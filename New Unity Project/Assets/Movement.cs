@@ -1,29 +1,43 @@
-﻿using UnityEngine;
+﻿using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
 
-public class Movement : MonoBehaviour
-{
-   public float MovementSpeed = 1;
-   public float Jumpforce = 1;
+public class Movement : MonoBehaviour {
 
-   private Rigidbody2D _rigidbody;
+	public CharacterController2D controller;
 
-   private void Start()
-   {
-       _rigidbody = GetComponent<Rigidbody2D>();
-   }
+	public float runSpeed = 40f;
 
-   private void Update()
-   {
-       var movement = Input.GetAxis("Horizontal");
-       transform.position += new Vector3(movement, 0, 0) * Time.deltaTime * MovementSpeed;
+	float horizontalMove = 0f;
 
-       if (!Mathf.Approximately(0, movement))
-            transform.rotation = movement > 0 ? Quaternion.Euler(0, 180, 0) : Quaternion.identity;
-   
-       if (Input.GetButtonDown("Jump") && Mathf.Abs(_rigidbody.velocity.y) < 0.0001f)
-       {
-           _rigidbody.AddForce(new Vector2(0, Jumpforce), ForceMode2D.Impulse);
-       }
-   }
+	bool jump = false;
 
+	bool crouch = false;
+	
+	// Update is called once per frame
+	void Update () {
+
+		horizontalMove = Input.GetAxisRaw("Horizontal") * runSpeed;
+
+		if (Input.GetButtonDown("Jump"))
+		{
+			jump = true;
+		}
+
+		if (Input.GetButtonDown("Crouch"))
+		{
+			crouch = true;
+		} else if (Input.GetButtonUp("Crouch"))
+		{
+			crouch = false;
+		}
+
+	}
+
+	void FixedUpdate ()
+	{
+		// Move our character
+		controller.Move(horizontalMove * Time.fixedDeltaTime, crouch, jump);
+		jump = false;
+	}
 }
